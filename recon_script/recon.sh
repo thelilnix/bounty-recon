@@ -33,7 +33,6 @@ export seclists_path='~/wordlists/SecLists' # (without /)
 # - Asnlookup
 # - virtual-host-discovery
 # - ffuf
-# - TOR and proxychains
 # - aquatone (maybe, I'm not sure :/)
 # ################################################
 
