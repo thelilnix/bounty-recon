@@ -15,7 +15,7 @@ export NOPE="\033[0m"
 
 export seclists_path='~/wordlists/SecLists' # (without /)
 
-# TODO: wildcard (*) scopes. and out of scope
+# TODO: out of scope
 
 # ##################################################
 
@@ -24,15 +24,17 @@ export seclists_path='~/wordlists/SecLists' # (without /)
 # - crt.sh
 # - waybackurls
 # - dirsearch
-# - nikto
-# - massdns
+# - massdns (not required)
 # - https://github.com/sathishshan/Zone-transfer
 # - DIG
+# - JSFScan.sh
+# - deduplicate
+# - gf
+# - Dalfox
 # - unfurl
 # - httprobe
-# - Asnlookup
-# - virtual-host-discovery
-# - ffuf
+# - Asnlookup (not required)
+# - virtual-host-discovery (not required)
 # - aquatone (maybe, I'm not sure :/)
 # ################################################
 
@@ -66,7 +68,6 @@ log() {
 sublist3r() {
     log "Sublist3r ($1)"
     $tools_path/Sublist3r/sublist3r.py -d $1 -t 5 -o $report_path/$1/subdomains.txt &>/dev/null
-    # Check for out of scope
 }
 
 # crt.sh
@@ -83,7 +84,7 @@ wayback() {
     mkdir -p $report_path/$1/wayback/
 
     cat $report_path/$1/urls.txt | waybackurls > $report_path/$1/wayback/waybackurls.txt
-    cat $report_path/$1/wayback/waybackurls.txt | sort -u | unfurl --unique keys > $report_path/$1/wayback/paramlist.txt
+    cat $report_path/$1/wayback/waybackurls.txt | deduplicate --sort | unfurl format %d%p?%q | sed "/?$/d" > $report_path/$1/wayback/paramlist.txt
     [ -s $report_path/$1/wayback/paramlist.txt ] && log "$report_path/$1/wayback/paramlist.txt saved"
 
     cat $report_path/$1/wayback/waybackurls.txt | sort -u | grep -P "\w+\.js(\?|$)" | sort -u > $report_path/$1/wayback/jsurls.txt
@@ -101,19 +102,20 @@ wayback() {
 
 # dirsearch
 dirsearch() {
-    log "dirsearch ($1)"
-    cat $report_path/$1/urls.txt | xargs -P10 -I % sh -c "python3 $tools_path/dirsearch/dirsearch.py -e php,asp,aspx,jsp,html,zip,jar -w $tools_path/dirsearch/db/dicc.txt -t 30 -u %" > $report_path/$1/dirsearch.txt
+    log "dirsearch ($2)"
+    domain=$(echo $2 | unfurl domains)
+    python3 $tools_path/dirsearch/dirsearch.py -e php,asp,aspx,jsp,html,zip,jar -w $tools_path/dirsearch/db/dicc.txt -t 30 -u $2 > $report_path/$1/scans/dirsearch/$domain.txt
 }
 
-# nikto
-niktof() {
-    for target in $(cat $report_path/$1/urls.txt);do
-        echo -e " $PURPLE=-=-=-=$YELLOW $target $PURPLE=-=-=-=$NOPE " | tee -a $report_path/$1/nikto.txt
-        nikto -h $target >> $report_path/$1/nikto.txt
-    done
+# JSFScan.sh
+JSFScan() {
+    log "Working on JS ($1)"
+    current_dir=$(pwd)
+    cd $tools_path/JSFScan.sh/ && $tools_path/JSFScan.sh/JSFScan.sh -l $current_dir/$report_path/$1/urls.txt --all -r -o $current_dir/$report_path/$1/scans/JS/ &>/dev/null
+    cd $current_dir
 }
 
-# virtual-host-discovery
+# virtual-host-discovery (not required)
 vhostdiscovery() {
     log "virtual host discovery ($1)"
     ruby $tools_path/virtual-host-discovery/scan.rb --ip=$1 --host=domain.tld
@@ -125,7 +127,7 @@ massdns() {
     $tools_path/massdns/scripts/subbrute.py $seclists_path/Discovery/DNS/clean-jhaddix-dns.txt $1 | $tools_path/massdns/bin/massdns -r $tools_path/massdns/lists/resolvers.txt -t A -q -o S | grep -v 142.54.173.92 > $report_path/$1/mass.txt
 }
 
-# Asnlookup
+# Asnlookup (not required)
 asnlookup() {
     log "asnlookup ($1)"
     python3 $tools_path/Asnlookup/asnlookup.py -n "-A -T4" -o "$report_path/$1/asnlookup.txt"
@@ -140,7 +142,7 @@ zone_transfer() {
 # live hosts
 live_hosts() {
     log "Searching for live hosts ($1)"
-    cat $report_path/$1/subdomains.txt | sort -u | httprobe -c 50 -t 3000 >> $report_path/$1/live_hosts.txt
+    cat $report_path/$1/subdomains.txt | sort -u | httprobe -c 50 -t 5000 >> $report_path/$1/live_hosts.txt
     cat $report_path/$1/live_hosts.txt | sed 's/\http\:\/\///g' | sed 's/\https\:\/\///g' | sort -u | while read line; do
     probeurl=$(cat $report_path/$1/live_hosts.txt | sort -u | grep -m 1 $line)
     echo "$probeurl" >> ./$report_path/$1/urls.txt
@@ -172,8 +174,14 @@ cname_ns_txt_records() {
     cat $report_path/$1/cleancrtsh.txt | grep TXT >> $report_path/$1/txt_records.txt
 }
 
+# Dalfox and gf
+xss_scanner() {
+    log "Working on XSS (paramlist.txt) ($1)"
+    cat $report_path/$1/wayback/paramlist.txt | gf xss 2>/dev/null | dalfox pipe -o $report_path/$1/scans/XSS_check/dalfox.txt &>/dev/null
+}
+
 main() {
-    if [ -s scope.txt && -s out-of-scope.txt ];then
+    if [ -s scope.txt ];then
         for scope in $(cat scope.txt);do
             # Recon 1 (Subdomains and DNS records)
             log "Starting recon ($scope)"
@@ -186,9 +194,16 @@ main() {
             # Recon 2 (live hosts and ...)
             live_hosts $scope
             wayback $scope
-            # for subdomain in $(cat $report_path/$scope/subdomains.txt);do
-            #     # Recon 3 (scanning the hosts and subdomains)
-            # done
+            # Recon 3 (scanning the hosts and subdomains)
+            mkdir -p $report_path/$scope/scans/dirsearch
+            mkdir -p $report_path/$scope/scans/JS
+            mkdir -p $report_path/$scope/scans/XSS_check
+            JSFScan $scope
+            xss_scanner $scope
+            for url in $(cat $report_path/$scope/urls.txt);do
+                dirsearch $scope $url
+            done
+            # Recon 4 (Reporting)
         done
     else
         error "scope.txt/out-of-scope.txt not found"
@@ -196,7 +211,7 @@ main() {
     fi
 }
 
-if [[  $# != 1  ]];then
+if [ $# -ne 1 ];then
     usage
 else
     export tools_path="$1"
