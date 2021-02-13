@@ -178,13 +178,13 @@ cname_ns_txt_records() {
 # Dalfox and gf
 xss_scanner() {
     log "Working on XSS (paramlist.txt) ($1)"
-    cat $report_path/$1/wayback/paramlist.txt | gf xss 2>/dev/null | dalfox pipe -o $report_path/$1/scans/XSS_check/dalfox.txt &>/dev/null
+    cat $report_path/$1/wayback/paramlist.txt | gf xss 2>/dev/null | dalfox pipe -out $report_path/$1/scans/XSS_check/dalfox.txt &>/dev/null
 }
 
 # aquatone
 aquatonef() {
     log "aquatone ($1)"
-    cat $report_path/$1/urls.txt | aquatone -chrome-path $chromium_bin_path -o $report_path/$1/scans/Aquatone/ -threads 5 -silent
+    cat $report_path/$1/urls.txt | aquatone -chrome-path $chromium_bin_path -out $report_path/$1/scans/Aquatone/ -threads 5 -silent
 }
 
 # Report creator
@@ -221,9 +221,9 @@ if [ -s scope.txt ];then
         JSFScan $scope
         xss_scanner $scope
         aquatonef $scope
-        # for url in $(cat $report_path/$scope/urls.txt);do
-        #     dirsearch $scope $url
-        # done
+        for url in $(cat $report_path/$scope/urls.txt);do
+            dirsearch $scope $url
+        done
         # Recon 4 (Reporting)
     done
 else
