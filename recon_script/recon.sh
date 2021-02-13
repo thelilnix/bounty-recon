@@ -14,6 +14,7 @@ export PURPLE="\033[1;35m"
 export NOPE="\033[0m"
 
 export seclists_path='~/wordlists/SecLists' # (without /)
+export chromium_bin_path='/usr/bin/brave-browser' # Change this
 
 # TODO: out of scope
 
@@ -24,18 +25,18 @@ export seclists_path='~/wordlists/SecLists' # (without /)
 # - crt.sh
 # - waybackurls
 # - dirsearch
-# - massdns (not required)
 # - https://github.com/sathishshan/Zone-transfer
 # - DIG
 # - JSFScan.sh
 # - deduplicate
 # - gf
 # - Dalfox
+# - aquatone
 # - unfurl
 # - httprobe
+# - massdns (not required)
 # - Asnlookup (not required)
 # - virtual-host-discovery (not required)
-# - aquatone (maybe, I'm not sure :/)
 # ################################################
 
 echo -e "$BLUE
@@ -180,43 +181,52 @@ xss_scanner() {
     cat $report_path/$1/wayback/paramlist.txt | gf xss 2>/dev/null | dalfox pipe -o $report_path/$1/scans/XSS_check/dalfox.txt &>/dev/null
 }
 
-main() {
-    if [ -s scope.txt ];then
-        for scope in $(cat scope.txt);do
-            # Recon 1 (Subdomains and DNS records)
-            log "Starting recon ($scope)"
-            scope="$(echo $scope | unfurl format %r.%t)"
-            mkdir -p $report_path/$scope/
-            sublist3r $scope
-            zone_transfer $scope
-            crtsh $scope
-            cname_ns_txt_records $scope
-            # Recon 2 (live hosts and ...)
-            live_hosts $scope
-            wayback $scope
-            # Recon 3 (scanning the hosts and subdomains)
-            mkdir -p $report_path/$scope/scans/dirsearch
-            mkdir -p $report_path/$scope/scans/JS
-            mkdir -p $report_path/$scope/scans/XSS_check
-            JSFScan $scope
-            xss_scanner $scope
-            for url in $(cat $report_path/$scope/urls.txt);do
-                dirsearch $scope $url
-            done
-            # Recon 4 (Reporting)
-        done
-    else
-        error "scope.txt/out-of-scope.txt not found"
-        exit 1
-    fi
+# aquatone
+aquatonef() {
+    log "aquatone ($1)"
+    cat $report_path/$1/urls.txt | aquatone -chrome-path $chromium_bin_path -o $report_path/$1/scans/Aquatone/ -threads 5 -silent
+}
+
+# Report creator
+report() {
+    log "Creating the report..."
 }
 
 if [ $# -ne 1 ];then
     usage
-else
+fi
+
+if [ -s scope.txt ];then
     export tools_path="$1"
     export report_date="$(date +%d_%m_%Y-%H.%M)"
     mkdir -p recon/$report_date/
     export report_path="recon/$report_date"
+    for scope in $(cat scope.txt);do
+        # Recon 1 (Subdomains and DNS records)
+        log "Starting recon ($scope)"
+        scope="$(echo $scope | unfurl format %r.%t)"
+        mkdir -p $report_path/$scope/
+        sublist3r $scope
+        zone_transfer $scope
+        crtsh $scope
+        cname_ns_txt_records $scope
+        # Recon 2 (live hosts and ...)
+        live_hosts $scope
+        wayback $scope
+        # Recon 3 (scanning the hosts and subdomains)
+        mkdir -p $report_path/$scope/scans/Aquatone
+        mkdir -p $report_path/$scope/scans/JS
+        mkdir -p $report_path/$scope/scans/XSS_check
+        mkdir -p $report_path/$scope/scans/dirsearch
+        JSFScan $scope
+        xss_scanner $scope
+        aquatonef $scope
+        # for url in $(cat $report_path/$scope/urls.txt);do
+        #     dirsearch $scope $url
+        # done
+        # Recon 4 (Reporting)
+    done
+else
+    error "scope.txt not found"
+    exit 1
 fi
-main
