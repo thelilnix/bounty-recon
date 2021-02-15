@@ -113,41 +113,13 @@
     <br/>
     <h3 class='text-white-50'>dirsearch result</h3>
     <br/>
-    <table id='dirsearch-table' class='table table-dark table-striped'>
-        <thead>
-        <tr>
-            <th>URL</th>
-            <th>Status</th>
-            <th>Len</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>admin.example.com/wp-content</td>
-            <td>200</td>
-            <td>66B</td>
-        </tr>
-        <tr>
-            <td>admin.example.com/wp-json</td>
-            <td>403</td>
-            <td>81B</td>
-        </tr>
-        <tr>
-            <td>admin.example.com/wp-admin</td>
-            <td>200</td>
-            <td>79B</td>
-        </tr>
-        </tbody>
-    </table>
+    <pre style='color:white;'>admin.example.com <a href='file://' class='btn btn-info'>Let's go</a></pre>
     <script src='https://code.jquery.com/jquery-3.5.1.js'></script>
     <script src='https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js'></script>
     <script src='https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap.min.js'></script>
     <script>
         $(document).ready(function() {
             $('#subdomain-table').DataTable();
-        } );
-        $(document).ready(function() {
-            $('#dirsearch-table').DataTable();
         } );
     </script>
     <!-- Optional JavaScript; choose one of the two! -->
