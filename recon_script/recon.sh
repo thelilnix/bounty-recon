@@ -28,6 +28,7 @@ export chromium_bin_path='/usr/bin/brave-browser' # Change this
 # - dirsearch
 # - https://github.com/sathishshan/Zone-transfer
 # - DIG
+# - aha (for coloring html output)
 # - curl
 # - nmap
 # - JSFScan.sh
@@ -35,6 +36,7 @@ export chromium_bin_path='/usr/bin/brave-browser' # Change this
 # - gf
 # - Dalfox
 # - aquatone
+# - whichCDN (SamEbison fork) (https://github.com/ebsa491/whichCDN.git)
 # - unfurl
 # - httprobe
 # - xdg-open
@@ -88,18 +90,32 @@ nmapf() {
     log "Nmap ($1)"
     touch $report_path/$1/scans/nmap/result.txt
     for ip in $(cat $report_path/$1/ip.txt);do
-        log "$PURPLE--------------$GREEN $target $PURPLE---------------$NOPE" >> $report_path/$1/scans/nmap/result.txt
-        nmap -A -T4 $ip >> $report_path/$1/scans/nmap/result.txt
+        log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/nmap/result.txt
+        /usr/bin/nmap -sV -T4 -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip | grep -E 'open|filtered|closed' >> $report_path/$1/scans/nmap/result.txt
     done
 }
 
 # extract IPs
 ip_extractor() {
     log "IPs ($1)"
+    touch $report_path/$1/ip.txt
     for subdomain in $(cat $report_path/$1/subdomains.txt);do
-        dig $subdomain +short >> $report_path/$1/ip.txt
+        if [ "$(which_cdn $subdomain)" = "0" ];then
+            # There is no CDN :)
+            dig $subdomain +short >> $report_path/$1/ip.txt
+        fi
     done
-    sort -u $report_path/$1/ip.txt -o $report_path/$1/ip.txt
+    [ -s $report_path/$1/ip.txt ] && sort -u $report_path/$1/ip.txt -o $report_path/$1/ip.txt
+}
+
+# whichCDN
+which_cdn() {
+    log "CDN Checking ($1)"
+    if [ "$(python3 $tools_path/whichCDN/whichCDN $1 2>/dev/null | grep -i 'No CDN found')" = "" ];then
+        echo "1"
+    else
+        echo "0"
+    fi
 }
 
 # waybackurls
