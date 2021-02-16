@@ -7,7 +7,7 @@
 
     <!-- Bootstrap CSS -->
     <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin='anonymous'>
-    <title>Report DNS - $1</title>
+    <title>Report WayBackURLS - $1</title>
   </head>
   <body>
   <style>
@@ -26,46 +26,25 @@
             <a class='nav-link' href='index.html'>Subdomains</a>
             <a class='nav-link' href='../scans/Aquatone/aquatone_report.html' target='_blank'>Aquatone</a>
             <a class='nav-link' href='wayback.html'>WayBackMachine</a>
-            <a class='nav-link active' aria-current='page'>DNS</a>
+            <a class='nav-link' href='dns.html'>DNS</a>
             <a class='nav-link' href='dalfox.html'>Dalfox</a>
             <a class='nav-link' href='../scans/JS/report.html' target='_blank'>JSFScan</a>
             <a class='nav-link' href='nmap.html'>NMAP</a>
-            <a class='nav-link' href='urls.html'>URLs</a>
+            <a class='nav-link active' aria-current='page'>URLs</a>
         </div>
         </div>
     </div>
     </nav>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <h2 class='text-white'>Zone Transfer</h2>
-    <hr style='color: white;'/>
-    <pre class='text-white'>
-      $(cat $report_path/$1/zone_transfer.txt)
-    </pre>
-    <h2 class='text-white'>crtsh.txt</h2>
-    <hr style='color: white;'/>
-    <pre class='text-white'>
-      $(cat $report_path/$1/crtsh.txt)
-    </pre>
-    <h2 class='text-white'>cname_records.txt</h2>
-    <hr style='color: white;'/>
-    <pre class='text-white'>
-      $(cat $report_path/$1/cname_records.txt)
-    </pre>
-    <h2 class='text-white'>txt_records.txt</h2>
-    <hr style='color: white;'/>
-    <pre class='text-white'>
-      $(cat $report_path/$1/txt_records.txt)
-    </pre>
-    <h2 class='text-white'>ns_takeover.txt</h2>
-    <hr style='color: white;'/>
-    <pre class='text-white'>
-      $(cat $report_path/$1/ns_takeover.txt)
-    </pre>
     <!-- Optional JavaScript; choose one of the two! -->
-
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <h2 class='text-white'>Live URLs</h2>
+    <hr style='color: white;'/>
+    <pre class='text-white'>
+    $(cat $report_path/$1/urls.txt)
+    </pre>
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js' integrity='sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0' crossorigin='anonymous'></script>
     <!-- Option 2: Separate Popper and Bootstrap JS -->
