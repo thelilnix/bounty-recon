@@ -16,10 +16,6 @@ export NOPE="\033[0m"
 export seclists_path='~/wordlists/SecLists' # (without /)
 export chromium_bin_path='/usr/bin/brave-browser' # Change this
 
-# TODO: out of scope
-# TODO: README.md
-# TODO: install.sh
-
 # ################### TOOLS #######################
 # - Sublist3r
 # - crt.sh
