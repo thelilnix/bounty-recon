@@ -13,8 +13,8 @@ export YELLOW="\033[1;33m"
 export PURPLE="\033[1;35m"
 export NOPE="\033[0m"
 
-export seclists_path='~/wordlists/SecLists' # (without /)
-export wfuzz_wordlist_path='~/wordlists/wfuzz' # (without /)
+export seclists_path="$HOME/wordlists/SecLists" # (without /)
+export wfuzz_wordlists_path="$HOME/wordlists/wfuzz" # (without /)
 export chromium_bin_path='/usr/bin/brave-browser' # Change this
 
 # ################### TOOLS #######################
@@ -141,7 +141,7 @@ wayback() {
 dirsearch() {
     log "dirsearch ($2)"
     domain=$(echo $2 | unfurl domains)
-    python3 $tools_path/dirsearch/dirsearch.py -e php,asp,aspx,jsp,html,zip,jar -w $wfuzz_wordlist_path/general/common.txt -t 50 -u $2 -q -R 0 --plain-text-report=$report_path/$1/scans/dirsearch/$domain.txt &>/dev/null
+    python3 $tools_path/dirsearch/dirsearch.py -e php,asp,aspx,jsp,html,zip,jar -w $wfuzz_wordlists_path/general/common.txt -t 50 -u "$2" -q -R 0 --plain-text-report=$report_path/$1/scans/dirsearch/$domain.txt &>/dev/null
     [ -s $report_path/$1/scans/dirsearch/$domain.txt ] && sed -i "/^Time/d;/^$/d" $report_path/$1/scans/dirsearch/$domain.txt
 }
 
