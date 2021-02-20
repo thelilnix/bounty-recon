@@ -88,31 +88,32 @@ nmapf() {
     touch $report_path/$1/scans/nmap/result.txt
     for ip in $(cat $report_path/$1/ip.txt);do
         log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/nmap/result.txt
-        /usr/bin/nmap -sV -T4 -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip | grep -E 'open|filtered|closed' >> $report_path/$1/scans/nmap/result.txt
+        /usr/bin/nmap -sV -T4 -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/nmap/result.txt
     done
+}
+
+# whichCDN
+which_cdn() {
+    if [ "$(python3 $tools_path/whichCDN/whichCDN $1 2>&1 | grep -i 'No CDN found')" = "" ];then
+        echo "1"
+    else
+        echo "0"
+    fi
 }
 
 # extract IPs
 ip_extractor() {
     log "IPs ($1)"
-    touch $report_path/$1/ip.txt
-    for subdomain in $(cat $report_path/$1/subdomains.txt);do
-        if [ "$(which_cdn $subdomain)" = "0" ];then
+    cd $tools_path/whichCDN
+    touch $absolute_path/$report_path/$1/ip.txt
+    for subdomain in $(cat $absolute_path/$report_path/$1/subdomains.txt);do
+        if [ "$(which_cdn $subdomain | grep -i '1')" = "" ];then
             # There is no CDN :)
-            dig $subdomain +short >> $report_path/$1/ip.txt
+            dig $subdomain +short >> $absolute_path/$report_path/$1/ip.txt
         fi
     done
+    cd $absolute_path
     [ -s $report_path/$1/ip.txt ] && sort -u $report_path/$1/ip.txt -o $report_path/$1/ip.txt
-}
-
-# whichCDN
-which_cdn() {
-    log "CDN Checking ($1)"
-    if [ "$(python3 $tools_path/whichCDN/whichCDN $1 2>/dev/null | grep -i 'No CDN found')" = "" ];then
-        echo "1"
-    else
-        echo "0"
-    fi
 }
 
 # waybackurls
@@ -241,7 +242,7 @@ report() {
     # dns.html
     echo "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin='anonymous'><title>Report DNS - $1</title></head><body><style>body{background-color:#2c3e50}</style><nav class='navbar fixed-top navbar-expand-lg navbar-dark bg-dark'><div class='container-fluid'> <a class='navbar-brand'>Recon!</a> <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNavAltMarkup' aria-controls='navbarNavAltMarkup' aria-expanded='false' aria-label='Toggle navigation'> <span class='navbar-toggler-icon'></span> </button><div class='collapse navbar-collapse' id='navbarNavAltMarkup'><div class='navbar-nav'> <a class='nav-link' href='index.html'>Subdomains</a> <a class='nav-link' href='../scans/Aquatone/aquatone_report.html' target='_blank'>Aquatone</a> <a class='nav-link' href='wayback.html'>WayBackMachine</a> <a class='nav-link active' aria-current='page'>DNS</a> <a class='nav-link' href='dalfox.html'>Dalfox</a> <a class='nav-link' href='../scans/JS/report.html' target='_blank'>JSFScan</a> <a class='nav-link' href='nmap.html'>NMAP</a><a class='nav-link' href='urls.html'>URLs</a></div></div></div> </nav> <br/> <br/> <br/> <br/><h2 class='text-white'>Zone Transfer</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/zone_transfer.txt | aha -n) </pre><h2 class='text-white'>crtsh.txt</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/crtsh.txt) </pre><h2 class='text-white'>cname_records.txt</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/cname_records.txt) </pre><h2 class='text-white'>txt_records.txt</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/txt_records.txt) </pre><h2 class='text-white'>ns_takeover.txt</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/ns_takeover.txt) </pre> <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js' integrity='sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0' crossorigin='anonymous'></script> </body></html>" >> $report_path/$1/report/dns.html
     # nmap.html
-    echo "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin='anonymous'><link href='https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap.min.css' rel='stylesheet'><title>Report NMAP - $1</title></head><body><style>body{background-color:#2c3e50}.paginate_button{position:relative;display:block;padding:0.5rem 0.75rem;margin-left:-1px;line-height:1.25;color:#fff;background-color:#6c757d;border:1px solid #346767}.paginate_button.disabled .paginate_button{color:#868e96;pointer-events:none;cursor:auto;background-color:#6c757d;border-color:#346767}.paginate_button.active .paginate_button{z-index:1;color:#fff;background-color:#212529;border-color:#346767}.paginate_button:focus,.paginate_button:hover{color:#fff;text-decoration:none;background-color:#212529;border-color:#346767}label{color:rgba(255,255,255,.5)}.dataTables_info{color:rgba(255,255,255,.5)}a{color:white}</style><nav class='navbar fixed-top navbar-expand-lg navbar-dark bg-dark'><div class='container-fluid'> <a class='navbar-brand'>Recon!</a> <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNavAltMarkup' aria-controls='navbarNavAltMarkup' aria-expanded='false' aria-label='Toggle navigation'> <span class='navbar-toggler-icon'></span> </button><div class='collapse navbar-collapse' id='navbarNavAltMarkup'><div class='navbar-nav'> <a class='nav-link' href='index.html'>Subdomains</a> <a class='nav-link' href='../scans/Aquatone/aquatone_report.html' target='_blank'>Aquatone</a> <a class='nav-link' href='wayback.html'>WayBackMachine</a> <a class='nav-link' href='dns.html'>DNS</a> <a class='nav-link' href='dalfox.html'>Dalfox</a> <a class='nav-link' href='../scans/JS/report.html' target='_blank'>JSFScan</a> <a class='nav-link active' aria-current='page'>NMAP</a><a class='nav-link' href='urls.html'>URLs</a></div></div></div> </nav> <br/> <br/> <br/> <br/><h2 class='text-white'>Nmap Output</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/scans/nmap/result.txt) </pre><h3 class='text-white-50'>IP</h3><hr style='color: white;'/><table id='ip-table' class='table table-dark table-striped'><thead><tr><th>IP address</th></tr></thead><tbody>" >> $report_path/$1/report/nmap.html
+    echo "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin='anonymous'><link href='https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap.min.css' rel='stylesheet'><title>Report NMAP - $1</title></head><body><style>body{background-color:#2c3e50}.paginate_button{position:relative;display:block;padding:0.5rem 0.75rem;margin-left:-1px;line-height:1.25;color:#fff;background-color:#6c757d;border:1px solid #346767}.paginate_button.disabled .paginate_button{color:#868e96;pointer-events:none;cursor:auto;background-color:#6c757d;border-color:#346767}.paginate_button.active .paginate_button{z-index:1;color:#fff;background-color:#212529;border-color:#346767}.paginate_button:focus,.paginate_button:hover{color:#fff;text-decoration:none;background-color:#212529;border-color:#346767}label{color:rgba(255,255,255,.5)}.dataTables_info{color:rgba(255,255,255,.5)}a{color:white}</style><nav class='navbar fixed-top navbar-expand-lg navbar-dark bg-dark'><div class='container-fluid'> <a class='navbar-brand'>Recon!</a> <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNavAltMarkup' aria-controls='navbarNavAltMarkup' aria-expanded='false' aria-label='Toggle navigation'> <span class='navbar-toggler-icon'></span> </button><div class='collapse navbar-collapse' id='navbarNavAltMarkup'><div class='navbar-nav'> <a class='nav-link' href='index.html'>Subdomains</a> <a class='nav-link' href='../scans/Aquatone/aquatone_report.html' target='_blank'>Aquatone</a> <a class='nav-link' href='wayback.html'>WayBackMachine</a> <a class='nav-link' href='dns.html'>DNS</a> <a class='nav-link' href='dalfox.html'>Dalfox</a> <a class='nav-link' href='../scans/JS/report.html' target='_blank'>JSFScan</a> <a class='nav-link active' aria-current='page'>NMAP</a><a class='nav-link' href='urls.html'>URLs</a></div></div></div> </nav> <br/> <br/> <br/> <br/><h2 class='text-white'>Nmap Output</h2><hr style='color: white;'/><pre class='text-white'> $(cat $report_path/$1/scans/nmap/result.txt | aha -n) </pre><h3 class='text-white-50'>IP</h3><hr style='color: white;'/><table id='ip-table' class='table table-dark table-striped'><thead><tr><th>IP address</th></tr></thead><tbody>" >> $report_path/$1/report/nmap.html
     for ip in $(cat $report_path/$1/ip.txt);do
         echo "<tr><td>$ip</td></tr>" >> $report_path/$1/report/nmap.html
     done
