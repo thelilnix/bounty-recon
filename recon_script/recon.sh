@@ -143,7 +143,7 @@ wayback() {
 gospiderf() {
     log "gospider ($1)"
     mkdir -p $report_path/$1/gospider
-    gospider -t 30 -q -o $report_path/$1/gospider/ -s $1
+    gospider -t 30 -q -o $report_path/$1/gospider/ -s "https://$1/"
 }
 
 # dirsearch
