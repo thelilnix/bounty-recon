@@ -57,6 +57,7 @@ I will be glad! Open an issue first or work on your assigned issue.
 ## TODO
 
 - [ ] install.sh
+- [ ] Docker
 - [ ] out of scope
 
 ## Other
