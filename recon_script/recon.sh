@@ -106,11 +106,11 @@ which_cdn() {
 ip_extractor() {
     log "IPs ($1)"
     cd $tools_path/whichCDN
-    touch $absolute_path/$report_path/$1/ip.txt
-    for subdomain in $(cat $absolute_path/$report_path/$1/subdomains.txt);do
+    touch $report_path/$1/ip.txt
+    for subdomain in $(cat $report_path/$1/subdomains.txt);do
         if [ "$(which_cdn $subdomain | grep -i '1')" = "" ];then
             # There is no CDN :)
-            dig $subdomain +short >> $absolute_path/$report_path/$1/ip.txt
+            dig $subdomain +short >> $report_path/$1/ip.txt
         fi
     done
     cd $absolute_path
@@ -157,7 +157,7 @@ dirsearch() {
 # JSFScan.sh
 JSFScan() {
     log "Working on JS ($1)"
-    cd $tools_path/JSFScan.sh/ && $tools_path/JSFScan.sh/JSFScan.sh -l $absolute_path/$report_path/$1/urls.txt --all -r -o $absolute_path/$report_path/$1/scans/JS/ &>/dev/null
+    cd $tools_path/JSFScan.sh/ && $tools_path/JSFScan.sh/JSFScan.sh -l $report_path/$1/urls.txt --all -r -o $report_path/$1/scans/JS/ &>/dev/null
     cd $absolute_path
 }
 
@@ -274,17 +274,19 @@ clean_tmp() {
     rm $report_path/$1/cleancrtsh.txt
 }
 
-if [ $# -ne 1 ];then
+if [ $# -ne 2 ];then
     usage
 fi
 
-if [ -s scope.txt ];then
-    export tools_path="$1"
+export tools_path="$2"
+export target_program_path="$1"
+
+if [ -s "$target_program_path/scope.txt" ];then
     export report_date="$(date +%d_%m_%Y-%H.%M)"
-    mkdir -p recon/$report_date/
-    export report_path="recon/$report_date"
+    mkdir -p $target_program_path/recon/$report_date/
+    export report_path="$target_program_path/recon/$report_date"
     export absolute_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-    for scope in $(cat scope.txt);do
+    for scope in $(cat $target_program_path/scope.txt);do
         # Recon 1 (Subdomains and DNS records)
         log "Starting recon ($scope)"
         scope="$(echo $scope | unfurl format %r.%t)"

@@ -46,7 +46,8 @@ Change the script settings too
 ./create.sh YOUR_TARGET_NAME
 cd YOUR_TARGET_NAME
 (edit scope.txt)
-./recon.sh YOUR_TOOLS_PATH_WITHOUT_SLASH
+(cd RECON.SH_PATH)
+./recon.sh YOUR_PROGRAM_DIR_PATH_WITHOUT_SLASH YOUR_TOOLS_PATH_WITHOUT_SLASH
 ```
 
 ## Contributing

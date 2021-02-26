@@ -8,7 +8,6 @@
 #   note.txt     ( Some important notes )
 #   TODO.md      ( TODO-list )
 #   burp.json    ( Burp Suite configuration )
-#   recon.sh     ( the recon script for automation )
 
 if [[ $# != 1 ]];then
     echo "USAGE: ./create.sh TARGET_NAME"
@@ -22,11 +21,9 @@ mkdir $1
 # Creating the structure
 echo -e "\033[1;32m Creating the structure...\033[0m"
 mkdir $1/leakped_data
-mkdir $1/recon
 touch $1/scope.txt
 touch $1/note.txt
 touch $1/TODO.md
-cp recon_script/recon.sh $1/
 
-echo -e "\033[1;32mDONE!\033[0m move the burp config to the directory manually!"
+echo -e "\033[1;32mDONE!\033[0m move the burp config to the directory manually! and run recon.sh"
 
