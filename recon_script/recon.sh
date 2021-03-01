@@ -191,7 +191,7 @@ live_hosts() {
     cat $report_path/$1/subdomains.txt | sort -u | httprobe -c 50 -t 5000 >> $report_path/$1/live_hosts.txt
     cat $report_path/$1/live_hosts.txt | sed 's/\http\:\/\///g' | sed 's/\https\:\/\///g' | sort -u | while read line; do
     probeurl=$(cat $report_path/$1/live_hosts.txt | sort -u | grep -m 1 $line)
-    echo "$probeurl" >> ./$report_path/$1/urls.txt
+    echo "$probeurl" >> $report_path/$1/urls.txt
     done
     echo "$(cat $report_path/$1/urls.txt | sort -u)" > $report_path/$1/urls.txt
     log "Total of $(wc -l $report_path/$1/urls.txt | awk '{print $1}') live subdomains were found"
