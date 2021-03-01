@@ -142,7 +142,6 @@ wayback() {
 # gospider
 gospiderf() {
     log "gospider ($1)"
-    mkdir -p $report_path/$1/gospider
     gospider -t 30 -q -o $report_path/$1/gospider/ -s "https://$1/"
 }
 
@@ -299,6 +298,7 @@ if [ -s "$target_program_path/scope.txt" ];then
         ip_extractor $scope
         live_hosts $scope
         wayback $scope
+        mkdir -p $report_path/$1/gospider
         gospider $scope
         # Recon 3 (scanning the hosts and subdomains)
         mkdir -p $report_path/$scope/scans/Aquatone
