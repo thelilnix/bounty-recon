@@ -298,7 +298,7 @@ if [ -s "$target_program_path/scope.txt" ];then
         ip_extractor $scope
         live_hosts $scope
         wayback $scope
-        mkdir -p $report_path/$1/gospider
+        mkdir -p $report_path/$scope/gospider
         gospider $scope
         # Recon 3 (scanning the hosts and subdomains)
         mkdir -p $report_path/$scope/scans/Aquatone
