@@ -4,7 +4,8 @@
 # A bug bouty program directory structure
 #   leaked_data/ ( leaked data )
 #   recon/       ( reconnaissance )
-#   scope.txt    ( in-scope and out of scope )
+#   scope.txt    ( in-scope )
+#   out_of_scope.txt ( out of scope )
 #   note.txt     ( Some important notes )
 #   TODO.md      ( TODO-list )
 #   burp.json    ( Burp Suite configuration )
@@ -22,6 +23,7 @@ mkdir $1
 echo -e "\033[1;32m Creating the structure...\033[0m"
 mkdir $1/leakped_data
 touch $1/scope.txt
+touch $1/out_of_scope.txt
 touch $1/note.txt
 touch $1/TODO.md
 
