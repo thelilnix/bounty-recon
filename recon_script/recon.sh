@@ -89,7 +89,7 @@ nmapf() {
     touch $report_path/$1/scans/nmap/result.txt
     for ip in $(cat $report_path/$1/ip.txt);do
         log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/nmap/result.txt
-        /usr/bin/nmap -sV -T4 -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/nmap/result.txt
+        nmap -sV -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/nmap/result.txt
     done
 }
 
