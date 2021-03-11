@@ -300,7 +300,7 @@ if [ -s "$target_program_path/scope.txt" ];then
         live_hosts $scope
         wayback $scope
         mkdir -p $report_path/$scope/gospider
-        gospider $scope
+        gospiderf $scope
         # Recon 3 (scanning the hosts and subdomains)
         mkdir -p $report_path/$scope/scans/Aquatone
         mkdir -p $report_path/$scope/scans/nmap
