@@ -14,7 +14,6 @@ export PURPLE="\033[1;35m"
 export NOPE="\033[0m"
 
 export seclists_path="$HOME/wordlists/SecLists" # (without /)
-export wfuzz_wordlists_path="$HOME/wordlists/wfuzz" # (without /)
 export chromium_bin_path='/usr/bin/brave-browser' # Change this
 
 # ################### TOOLS #######################
@@ -22,7 +21,7 @@ export chromium_bin_path='/usr/bin/brave-browser' # Change this
 # - crt.sh
 # - waybackurls
 # - gospider
-# - dirsearch
+# - feroxbuster
 # - https://github.com/sathishshan/Zone-transfer
 # - DIG
 # - aha (for coloring html output)
@@ -39,7 +38,7 @@ export chromium_bin_path='/usr/bin/brave-browser' # Change this
 # - httpx
 # - xargs
 # - xdg-open
-# - wfuzz wordlists
+# - SecLists wordlists
 # - massdns (not required)
 # - Asnlookup (not required)
 # - virtual-host-discovery (not required)
@@ -148,12 +147,12 @@ gospiderf() {
     echo $1 | httpx 2>/dev/null | xargs -i{} gospider -t 30 -q -o $report_path/$1/gospider/ -s {} &>/dev/null
 }
 
-# dirsearch
-dirsearch() {
-    log "dirsearch ($2)"
+# feroxbuster
+feroxbusterf() {
+    log "Content Discovery ($2)"
     domain=$(echo $2 | unfurl domains)
-    python3 $tools_path/dirsearch/dirsearch.py -e php,asp,aspx,jsp,html,zip,jar -w $wfuzz_wordlists_path/general/common.txt -t 50 -u "$2" -q -R 0 --plain-text-report=$report_path/$1/scans/dirsearch/$domain.txt &>/dev/null
-    [ -s $report_path/$1/scans/dirsearch/$domain.txt ] && sed -i "/^Time/d;/^$/d" $report_path/$1/scans/dirsearch/$domain.txt
+    feroxbuster -e php,asp,aspx,jsp,html,zip,jar -w $seclists_path/Discovery/Web-Content/raft-small-directories.txt -u "$2" --user-agent 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36' -d 1 -o $report_path/$1/scans/feroxbuster/$domain.txt &>/dev/null
+    #[ -s $report_path/$1/scans/feroxbuster/$domain.txt ] && sed -i "/^Time/d;/^$/d" $report_path/$1/scans/feroxbuster/$domain.txt
 }
 
 # JSFScan.sh
@@ -242,11 +241,11 @@ report() {
     # index.html
     echo "<!doctypehtml><html lang=en><meta charset=utf-8><meta content='width=device-width,initial-scale=1'name=viewport><link href=https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css rel=stylesheet crossorigin=anonymous integrity=sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl><link href=https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap.min.css rel=stylesheet><title>Report - $1</title><body><style>body{background-color:#2c3e50}.paginate_button{position:relative;display:block;padding:.5rem .75rem;margin-left:-1px;line-height:1.25;color:#fff;background-color:#6c757d;border:1px solid #346767}.paginate_button.disabled .paginate_button{color:#868e96;pointer-events:none;cursor:auto;background-color:#6c757d;border-color:#346767}.paginate_button.active .paginate_button{z-index:1;color:#fff;background-color:#212529;border-color:#346767}.paginate_button:focus,.paginate_button:hover{color:#fff;text-decoration:none;background-color:#212529;border-color:#346767}label{color:rgba(255,255,255,.5)}.dataTables_info{color:rgba(255,255,255,.5)}a{color:#fff}</style><nav class='bg-dark fixed-top navbar navbar-dark navbar-expand-lg'><div class=container-fluid><a class=navbar-brand>Recon!</a> <button aria-controls=navbarNavAltMarkup aria-expanded=false aria-label='Toggle navigation'class=navbar-toggler data-bs-target=#navbarNavAltMarkup data-bs-toggle=collapse type=button><span class=navbar-toggler-icon></span></button><div class='collapse navbar-collapse'id=navbarNavAltMarkup><div class=navbar-nav><a class='nav-link active'aria-current=page>Subdomains</a> <a class=nav-link href=../scans/Aquatone/aquatone_report.html target=_blank>Aquatone</a> <a class=nav-link href=wayback.html>WayBackMachine</a> <a class='nav-link' href='gospider.html'>GoSpider</a> <a class=nav-link href=dns.html>DNS</a> <a class=nav-link href=dalfox.html>Dalfox</a> <a class=nav-link href=../scans/JS/report.html target=_blank>JSFScan</a> <a class=nav-link href=ports.html>Ports</a><a class='nav-link' href='urls.html'>URLs</a></div></div></div></nav><br><br><br><br><br><h3 class=text-white>Subdomain</h3><br><table cellspacing=0 class='table table-bordered table-dark table-sm table-striped'id=subdomain-table width=100%><thead><tr><th>Subdomain<th>Status Code<th>URLs<tbody>" >> $report_path/$1/report/index.html
     for line in $(cat $report_path/$1/subdomains.txt 2>/dev/null);do
-        echo "<tr><td id='subdomain'>$line</td><td>$(curl -I http://$line --connect-timeout 10 2>/dev/null | head -n 1 | cut -d$' ' -f2)</td><td>$((wc -l $report_path/$1/scans/dirsearch/$line.txt 2>/dev/null || echo '0') | awk '{print $1}')</td></tr>" >> $report_path/$1/report/index.html
+        echo "<tr><td id='subdomain'>$line</td><td>$(curl -I http://$line --connect-timeout 10 2>/dev/null | head -n 1 | cut -d$' ' -f2)</td><td>$((wc -l $report_path/$1/scans/feroxbuster/$line.txt 2>/dev/null || echo '0') | awk '{print $1}')</td></tr>" >> $report_path/$1/report/index.html
     done
-    echo "</tbody></table><br/><hr style='color: white;'/><br/><h3 class='text-white-50'>dirsearch result</h3><br/>" >> $report_path/$1/report/index.html
-    for subdir in $(/usr/bin/ls -Al $report_path/$1/scans/dirsearch/*.txt | awk -F':[0-9]* ' '/:/{print $2}' | rev | cut -d"/" -f 1 | rev | sed "s/.txt//g");do
-        echo "<pre style='color:white;'>$subdir <a href='../scans/dirsearch/$subdir.txt' class='btn btn-info'>Let's go</a></pre>" >> $report_path/$1/report/index.html
+    echo "</tbody></table><br/><hr style='color: white;'/><br/><h3 class='text-white-50'>Content Discovery result</h3><br/>" >> $report_path/$1/report/index.html
+    for subdir in $(/usr/bin/ls -Al $report_path/$1/scans/feroxbuster/*.txt | awk -F':[0-9]* ' '/:/{print $2}' | rev | cut -d"/" -f 1 | rev | sed "s/.txt//g");do
+        echo "<pre style='color:white;'>$subdir <a href='../scans/feroxbuster/$subdir.txt' class='btn btn-info'>Let's go</a></pre>" >> $report_path/$1/report/index.html
     done
     echo "<script src='https://code.jquery.com/jquery-3.5.1.js'></script><script src='https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js'></script><script src='https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap.min.js'></script><script>\$(document).ready(function() {\$('#subdomain-table').DataTable();} );</script><!-- Optional JavaScript; choose one of the two! --><!-- Option 1: Bootstrap Bundle with Popper --><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js' integrity='sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0' crossorigin='anonymous'></script><!-- Option 2: Separate Popper and Bootstrap JS --><!--<script src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js' integrity='sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi' crossorigin='anonymous'></script><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js' integrity='sha384-nsg8ua9HAw1y0W1btsyWgBklPnCUAFLuTMS2G72MMONqmOymq585AcH49TLBQObG' crossorigin='anonymous'></script>--></body></html>" >> $report_path/$1/report/index.html
     # dns.html
@@ -308,13 +307,13 @@ if [ -s "$target_program_path/scope.txt" ];then
         mkdir -p $report_path/$scope/scans/ports
         mkdir -p $report_path/$scope/scans/JS
         mkdir -p $report_path/$scope/scans/XSS_check
-        mkdir -p $report_path/$scope/scans/dirsearch
+        mkdir -p $report_path/$scope/scans/feroxbuster
         JSFScan $scope
         xss_scanner $scope
         aquatonef $scope
         rustscanf $scope
         for url in $(cat $report_path/$scope/urls.txt);do
-            dirsearch $scope $url
+            feroxbusterf $scope $url
         done
         # Recon 4 (Reporting)
         mkdir -p $report_path/$scope/report
