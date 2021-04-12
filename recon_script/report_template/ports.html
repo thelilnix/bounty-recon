@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin='anonymous'>
     <link href='https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap.min.css' rel='stylesheet'>
-    <title>Report NMAP - $1</title>
+    <title>Report Ports - $1</title>
   </head>
   <body>
   <style>
@@ -69,7 +69,7 @@
             <a class='nav-link' href='dns.html'>DNS</a>
             <a class='nav-link' href='dalfox.html'>Dalfox</a>
             <a class='nav-link' href='../scans/JS/report.html' target='_blank'>JSFScan</a>
-            <a class='nav-link active' aria-current='page'>NMAP</a>
+            <a class='nav-link active' aria-current='page'>Ports</a>
             <a class='nav-link' href='urls.html'>URLs</a>
         </div>
         </div>
@@ -79,10 +79,10 @@
     <br/>
     <br/>
     <br/>
-    <h2 class='text-white'>Nmap Output</h2>
+    <h2 class='text-white'>Ports</h2>
     <hr style='color: white;'/>
     <pre class='text-white'>
-      $(cat $report_path/$1/scans/nmap/result.txt | aha -n)
+      $(cat $report_path/$1/scans/ports/result.txt | aha -n)
     </pre>
     <h3 class='text-white-50'>IP</h3>
     <hr style='color: white;'/>
