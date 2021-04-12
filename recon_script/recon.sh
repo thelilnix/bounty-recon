@@ -41,7 +41,6 @@ export chromium_bin_path='/usr/bin/brave-browser' # Change this
 # - SecLists wordlists
 # - massdns (not required)
 # - Asnlookup (not required)
-# - virtual-host-discovery (not required)
 # ################################################
 
 echo -e "$BLUE
@@ -162,10 +161,10 @@ JSFScan() {
     cd $absolute_path
 }
 
-# virtual-host-discovery (not required)
+# virtual host discovery (not required)
 vhostdiscovery() {
     log "virtual host discovery ($1)"
-    ruby $tools_path/virtual-host-discovery/scan.rb --ip=$1 --host=domain.tld
+    nmap --script http-vhosts -p 80,443,8080 $1 >> $report_path/$1/vhosts/result.txt
 }
 
 # massdns (not required)
