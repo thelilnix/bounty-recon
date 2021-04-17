@@ -90,7 +90,7 @@ rustscanf() {
     for ip in $(cat $report_path/$1/ip.txt);do
         log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/ports/result.txt
         #nmap -sV -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
-        rustscan -a $ip --ulimit 5000 -- -sV 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
+        rustscan -a $ip -- -sV 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
     done
 }
 
@@ -150,7 +150,7 @@ gospiderf() {
 feroxbusterf() {
     log "Content Discovery ($2)"
     domain=$(echo $2 | unfurl domains)
-    feroxbuster -e php,asp,aspx,jsp,html,zip,jar -w $seclists_path/Discovery/Web-Content/raft-small-directories.txt -u "$2" --user-agent 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36' -d 1 -o $report_path/$1/scans/feroxbuster/$domain.txt &>/dev/null
+    feroxbuster -x php,asp,aspx,jsp,html,zip,jar -w $seclists_path/Discovery/Web-Content/raft-small-directories.txt -u "$2" --user-agent 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36' -d 1 -o $report_path/$1/scans/feroxbuster/$domain.txt &>/dev/null
     #[ -s $report_path/$1/scans/feroxbuster/$domain.txt ] && sed -i "/^Time/d;/^$/d" $report_path/$1/scans/feroxbuster/$domain.txt
 }
 
