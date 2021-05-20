@@ -21,7 +21,7 @@ mkdir $1
 
 # Creating the structure
 echo -e "\033[1;32m Creating the structure...\033[0m"
-mkdir $1/leakped_data
+mkdir $1/leaked_data
 touch $1/scope.txt
 touch $1/out_of_scope.txt
 touch $1/note.txt
