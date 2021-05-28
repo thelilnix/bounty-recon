@@ -83,14 +83,24 @@ crtsh() {
     cat $report_path/$1/subdomains.txt | $tools_path/massdns/bin/massdns -r $tools_path/massdns/lists/resolvers.txt -t A -q -o S -w  $report_path/$1/domaintemp.txt
 }
 
-# rustscan & nmap
-rustscanf() {
+# # rustscan & nmap
+# rustscanf() {
+#     log "Port scanning ($1)"
+#     touch $report_path/$1/scans/ports/result.txt
+#     for ip in $(cat $report_path/$1/ip.txt);do
+#         log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/ports/result.txt
+#         #nmap -sV -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
+#         rustscan -a $ip -- -sV 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
+#     done
+# }
+
+# nmap
+nmapf() {
     log "Port scanning ($1)"
     touch $report_path/$1/scans/ports/result.txt
     for ip in $(cat $report_path/$1/ip.txt);do
         log "$PURPLE--------------$GREEN $ip $PURPLE---------------$NOPE" | tee -a $report_path/$1/scans/ports/result.txt
-        #nmap -sV -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
-        rustscan -a $ip -- -sV 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
+        nmap -sV -Pn -p2075,2076,6443,3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,19000,19080 $ip 2>/dev/null | grep -E 'open|filtered|closed' >> $report_path/$1/scans/ports/result.txt
     done
 }
 
@@ -310,7 +320,7 @@ if [ -s "$target_program_path/scope.txt" ];then
         JSFScan $scope
         xss_scanner $scope
         aquatonef $scope
-        rustscanf $scope
+        nmapf $scope
         for url in $(cat $report_path/$scope/urls.txt);do
             feroxbusterf $scope $url
         done
