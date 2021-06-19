@@ -330,9 +330,9 @@ if [ -s "$target_program_path/scope.txt" ];then
         JSFScan $scope
         aquatonef $scope
         nmapf $scope
-        for url in $(cat $report_path/$scope/urls.txt);do
-            feroxbusterf $scope $url
-        done
+        #for url in $(cat $report_path/$scope/urls.txt);do
+            #feroxbusterf $scope $url
+        #done
         # Recon 4 (Reporting)
         mkdir -p $report_path/$scope/report
         clean_tmp $scope
